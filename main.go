@@ -3,20 +3,26 @@ package main
 import (
 	"fmt"
 	"github.com/joho/godotenv"
+	"github.com/kashyab12/gator/legler"
 	"log"
+	"net/http"
 	"os"
-)
-
-const (
-	DefaultPort = "8080"
 )
 
 func main() {
 	if loadErr := godotenv.Load(); loadErr != nil {
 		log.Fatalln(loadErr)
 	}
-	if serverPort := os.Getenv("PORT"); serverPort == "" {
-		serverPort = DefaultPort
+	serverPort := os.Getenv("PORT")
+	appRouter := http.NewServeMux()
+	// Add handlers for route
+	corsMux := legler.CorsMiddleware(appRouter)
+	server := http.Server{
+		Handler: corsMux,
+		Addr:    fmt.Sprintf(":%v", serverPort),
 	}
-	fmt.Println("gator gator")
+	err := server.ListenAndServe()
+	if err != nil {
+		return
+	}
 }
