@@ -14,8 +14,9 @@ func main() {
 		log.Fatalln(loadErr)
 	}
 	serverPort := os.Getenv("PORT")
+	// TODO: add chi and define separate routers and mount
 	appRouter := http.NewServeMux()
-	// Add handlers for route
+	appRouter.HandleFunc("/v1/readiness", legler.GetReadinessLegler)
 	corsMux := legler.CorsMiddleware(appRouter)
 	server := http.Server{
 		Handler: corsMux,
