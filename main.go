@@ -17,6 +17,7 @@ func main() {
 	// TODO: add chi and define separate routers and mount
 	appRouter := http.NewServeMux()
 	appRouter.HandleFunc("/v1/readiness", legler.GetReadinessLegler)
+	appRouter.HandleFunc("/v1/err", legler.GetErrorLegler)
 	corsMux := legler.CorsMiddleware(appRouter)
 	server := http.Server{
 		Handler: corsMux,
