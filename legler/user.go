@@ -5,7 +5,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/kashyab12/gator/internal/database"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -38,23 +37,14 @@ func (config *ApiConfig) PostUsersLegler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (config *ApiConfig) GetUsersLegler(w http.ResponseWriter, r *http.Request) {
-	if authHeader := r.Header.Get("Authorization"); authHeader == "" {
-		_ = RespondWithError(w, http.StatusUnauthorized, "Please provide ApiKey")
-	} else if splitAuthHeader := strings.Split(authHeader, "ApiKey "); len(splitAuthHeader) < 2 {
-		_ = RespondWithError(w, http.StatusUnauthorized, "Please provide ApiKey in format Authorization: ApiKey <key>")
-	} else {
-		apiKey := splitAuthHeader[1]
-		if queryUser, queryErr := config.DB.GetUser(r.Context(), apiKey); queryErr != nil {
-			_ = RespondWithError(w, http.StatusInternalServerError, queryErr.Error())
-		} else if responseErr := RespondWithJson(w, http.StatusOK, struct {
-			ID        uuid.UUID `json:"id"`
-			CreatedAt time.Time `json:"created_at"`
-			UpdatedAt time.Time `json:"updated_at"`
-			Name      string    `json:"name"`
-			ApiKey    string    `json:"api_key"`
-		}{queryUser.ID, queryUser.CreatedAt, queryUser.UpdatedAt, queryUser.Name, queryUser.ApiKey}); responseErr != nil {
-			_ = RespondWithError(w, http.StatusInternalServerError, responseErr.Error())
-		}
+func (config *ApiConfig) GetUsersLegler(w http.ResponseWriter, _ *http.Request, user database.User) {
+	if responseErr := RespondWithJson(w, http.StatusOK, struct {
+		ID        uuid.UUID `json:"id"`
+		CreatedAt time.Time `json:"created_at"`
+		UpdatedAt time.Time `json:"updated_at"`
+		Name      string    `json:"name"`
+		ApiKey    string    `json:"api_key"`
+	}{user.ID, user.CreatedAt, user.UpdatedAt, user.Name, user.ApiKey}); responseErr != nil {
+		_ = RespondWithError(w, http.StatusInternalServerError, responseErr.Error())
 	}
 }
