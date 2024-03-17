@@ -1,7 +1,6 @@
 package legler
 
 import (
-	"context"
 	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/kashyab12/gator/internal/database"
@@ -21,7 +20,7 @@ func (config *ApiConfig) PostUsersLegler(w http.ResponseWriter, r *http.Request)
 	)
 	if decodeErr := decoder.Decode(&userBody); decodeErr != nil {
 		_ = RespondWithError(w, http.StatusInternalServerError, decodeErr.Error())
-	} else if newUser, userInsertErr := config.DB.CreateUser(context.Background(), database.CreateUserParams{
+	} else if newUser, userInsertErr := config.DB.CreateUser(r.Context(), database.CreateUserParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
