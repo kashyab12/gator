@@ -40,3 +40,11 @@ func (config *ApiConfig) PostFeedsLegler(w http.ResponseWriter, r *http.Request,
 		_ = RespondWithError(w, http.StatusInternalServerError, responseErr.Error())
 	}
 }
+
+func (config *ApiConfig) GetFeedsLegler(w http.ResponseWriter, r *http.Request) {
+	if allFeeds, fetchFeedsErr := config.DB.GetFeeds(r.Context()); fetchFeedsErr != nil {
+		_ = RespondWithError(w, http.StatusInternalServerError, fetchFeedsErr.Error())
+	} else if responseErr := RespondWithJson(w, http.StatusOK, allFeeds); responseErr != nil {
+		_ = RespondWithError(w, http.StatusInternalServerError, responseErr.Error())
+	}
+}

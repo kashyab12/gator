@@ -36,6 +36,7 @@ func main() {
 	apiRouter.Post("/users", handlerConfig.PostUsersLegler)
 	apiRouter.Get("/users", handlerConfig.AuthMiddleware(handlerConfig.GetUsersLegler))
 	apiRouter.Post("/feeds", handlerConfig.AuthMiddleware(handlerConfig.PostFeedsLegler))
+	apiRouter.Get("/feeds", handlerConfig.GetFeedsLegler)
 	appRouter.Mount("/v1", apiRouter)
 
 	server := http.Server{
