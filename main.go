@@ -3,7 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	chi "github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"github.com/kashyab12/gator/internal/database"
 	"github.com/kashyab12/gator/legler"
@@ -27,18 +27,18 @@ func main() {
 	handlerConfig := legler.ApiConfig{
 		DB: dbQueries,
 	}
+	appRouter := chi.NewRouter()
+	appRouter.Use(legler.CorsMiddleware)
+
 	apiRouter := chi.NewRouter()
 	apiRouter.Get("/readiness", legler.GetReadinessLegler)
 	apiRouter.Get("/err", legler.GetErrorLegler)
 	apiRouter.Post("/users", handlerConfig.PostUsersLegler)
 	apiRouter.Get("/users", handlerConfig.GetUsersLegler)
-
-	appRouter := chi.NewRouter()
 	appRouter.Mount("/v1", apiRouter)
 
-	corsMux := legler.CorsMiddleware(appRouter)
 	server := http.Server{
-		Handler: corsMux,
+		Handler: appRouter,
 		Addr:    fmt.Sprintf(":%v", serverPort),
 	}
 	err := server.ListenAndServe()
