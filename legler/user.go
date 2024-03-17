@@ -12,7 +12,6 @@ type PostUserBody struct {
 	Name string `json:"name"`
 }
 
-// PostUsersLegler TODO: Need to handle an existing user with the same name?
 func (config *ApiConfig) PostUsersLegler(w http.ResponseWriter, r *http.Request) {
 	var (
 		decoder  = json.NewDecoder(r.Body)
