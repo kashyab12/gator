@@ -31,6 +31,7 @@ func main() {
 	apiRouter.Get("/readiness", legler.GetReadinessLegler)
 	apiRouter.Get("/err", legler.GetErrorLegler)
 	apiRouter.Post("/users", handlerConfig.PostUsersLegler)
+	apiRouter.Get("/users", handlerConfig.GetUsersLegler)
 
 	appRouter := chi.NewRouter()
 	appRouter.Mount("/v1", apiRouter)
