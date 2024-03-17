@@ -27,10 +27,14 @@ func main() {
 	handlerConfig := legler.ApiConfig{
 		DB: dbQueries,
 	}
+	apiRouter := chi.NewRouter()
+	apiRouter.Get("/readiness", legler.GetReadinessLegler)
+	apiRouter.Get("/err", legler.GetErrorLegler)
+	apiRouter.Post("/users", handlerConfig.PostUsersLegler)
+
 	appRouter := chi.NewRouter()
-	appRouter.Get("/v1/readiness", legler.GetReadinessLegler)
-	appRouter.Get("/v1/err", legler.GetErrorLegler)
-	appRouter.Post("/v1/users", handlerConfig.PostUsersLegler)
+	appRouter.Mount("/v1", apiRouter)
+
 	corsMux := legler.CorsMiddleware(appRouter)
 	server := http.Server{
 		Handler: corsMux,
