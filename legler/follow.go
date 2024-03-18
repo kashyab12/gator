@@ -55,3 +55,25 @@ func (config *ApiConfig) DeleteFeedFollowLegler(w http.ResponseWriter, r *http.R
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
+
+func (config *ApiConfig) GetAllFeedFollowsLegler(w http.ResponseWriter, r *http.Request, user database.User) {
+	if allFeedFollows, fetchErr := config.DB.GetFeedFollows(r.Context(), user.ID); fetchErr != nil {
+		_ = RespondWithError(w, http.StatusInternalServerError, fetchErr.Error())
+	} else if responseErr := RespondWithJson(w, http.StatusOK, dbFeedFollowToFeedFollowJson(allFeedFollows)); responseErr != nil {
+		_ = RespondWithError(w, http.StatusInternalServerError, responseErr.Error())
+	}
+}
+
+func dbFeedFollowToFeedFollowJson(dbFeedFollows []database.FeedFollow) (feedFollowsJson []FeedFollow) {
+	for _, dbFeedFollow := range dbFeedFollows {
+		feedFollow := FeedFollow{
+			ID:        dbFeedFollow.ID,
+			FeedID:    dbFeedFollow.FeedID,
+			UserID:    dbFeedFollow.UserID,
+			CreatedAt: dbFeedFollow.CreatedAt,
+			UpdatedAt: dbFeedFollow.UpdatedAt,
+		}
+		feedFollowsJson = append(feedFollowsJson, feedFollow)
+	}
+	return feedFollowsJson
+}
