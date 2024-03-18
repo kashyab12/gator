@@ -38,7 +38,7 @@ func main() {
 	apiRouter.Post("/feeds", handlerConfig.AuthMiddleware(handlerConfig.PostFeedsLegler))
 	apiRouter.Get("/feeds", handlerConfig.GetFeedsLegler)
 	apiRouter.Post("/feed_follows", handlerConfig.AuthMiddleware(handlerConfig.PostFeedFollowLegler))
-	apiRouter.Delete("/feed_follows/{feedFollowID}", handlerConfig.DeleteFeedFollow)
+	apiRouter.Delete("/feed_follows/{feedFollowID}", handlerConfig.DeleteFeedFollowLegler)
 	appRouter.Mount("/v1", apiRouter)
 
 	server := http.Server{

@@ -44,7 +44,7 @@ func (config *ApiConfig) PostFeedFollowLegler(w http.ResponseWriter, r *http.Req
 	}
 }
 
-func (config *ApiConfig) DeleteFeedFollow(w http.ResponseWriter, r *http.Request) {
+func (config *ApiConfig) DeleteFeedFollowLegler(w http.ResponseWriter, r *http.Request) {
 	if feedFollowIDStr := r.PathValue("feedFollowID"); len(feedFollowIDStr) < 1 {
 		_ = RespondWithError(w, http.StatusBadRequest, "invalid feedFollowID provided")
 	} else if feedFollowID, convErr := uuid.Parse(feedFollowIDStr); convErr != nil {
