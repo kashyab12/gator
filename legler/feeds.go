@@ -93,13 +93,12 @@ func dbFeedToFeedJson(feeds []database.Feed) (feedBodies []FeedBody) {
 	return feedBodies
 }
 
-func (config *ApiConfig) FetchFeedMaster(intervalInSeconds time.Duration) error {
+func (config *ApiConfig) FetchFeedMaster(intervalInSeconds time.Duration) {
 	const queryFeedLimit = 10
 	var waitGroup sync.WaitGroup
 	for {
-		<-time.After(time.Second * intervalInSeconds)
 		if fetchedFeeds, fetchErr := config.DB.GetNextFeedsToFetch(context.Background(), queryFeedLimit); fetchErr != nil {
-			return fetchErr
+			return
 		} else {
 			for idx, fetchedFeed := range fetchedFeeds {
 				waitGroup.Add(1)
@@ -107,6 +106,7 @@ func (config *ApiConfig) FetchFeedMaster(intervalInSeconds time.Duration) error 
 			}
 			waitGroup.Wait()
 		}
+		<-time.After(time.Second * intervalInSeconds)
 	}
 }
 

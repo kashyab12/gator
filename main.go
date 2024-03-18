@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 func main() {
@@ -45,6 +46,7 @@ func main() {
 		Handler: appRouter,
 		Addr:    fmt.Sprintf(":%v", serverPort),
 	}
+	go handlerConfig.FetchFeedMaster(time.Second * 60)
 	err := server.ListenAndServe()
 	if err != nil {
 		return
