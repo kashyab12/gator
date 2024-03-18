@@ -40,7 +40,15 @@ func (config *ApiConfig) PostFeedsLegler(w http.ResponseWriter, r *http.Request,
 		UserID:    user.ID,
 	}); feedInsertErr != nil {
 		_ = RespondWithError(w, http.StatusInternalServerError, feedInsertErr.Error())
-	} else if responseErr := RespondWithJson(w, http.StatusCreated, &FeedBody{
+	} else if feedFollow, feedFollowCreateErr := config.DB.CreateFeedFollow(r.Context(), database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		FeedID:    newFeed.ID,
+		UserID:    newFeed.UserID,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}); feedFollowCreateErr != nil {
+		_ = RespondWithError(w, http.StatusInternalServerError, feedFollowCreateErr.Error())
+	} else if responseErr := RespondWithJson(w, http.StatusCreated, map[string]any{"feed": &FeedBody{
 		ID:            newFeed.ID,
 		CreatedAt:     newFeed.CreatedAt,
 		UpdatedAt:     newFeed.UpdatedAt,
@@ -48,7 +56,7 @@ func (config *ApiConfig) PostFeedsLegler(w http.ResponseWriter, r *http.Request,
 		URL:           newFeed.Url,
 		UserID:        newFeed.UserID,
 		LastFetchedAt: nil,
-	}); responseErr != nil {
+	}, "feed_follow": feedFollow}); responseErr != nil {
 		_ = RespondWithError(w, http.StatusInternalServerError, responseErr.Error())
 	}
 }
