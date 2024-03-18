@@ -60,6 +60,10 @@ func (config *ApiConfig) GetFeedsLegler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
+func (config *ApiConfig) PostFeedFollowLegler(w http.ResponseWriter, r *http.Request, user database.User) {
+
+}
+
 func dbFeedToFeedJson(feeds []database.Feed) (feedBodies []FeedBody) {
 	for _, feed := range feeds {
 		var lastFetchedAtConv *time.Time = nil
