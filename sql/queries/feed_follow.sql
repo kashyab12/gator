@@ -5,3 +5,6 @@ returning *;
 
 -- name: GetFeedFollows :many
 select * from feed_follow where user_id = $1;
+
+-- name: DeleteFeedFollow :one
+delete from feed_follow where id = $1 returning *;

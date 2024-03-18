@@ -43,3 +43,15 @@ func (config *ApiConfig) PostFeedFollowLegler(w http.ResponseWriter, r *http.Req
 		_ = RespondWithError(w, http.StatusInternalServerError, responseErr.Error())
 	}
 }
+
+func (config *ApiConfig) DeleteFeedFollow(w http.ResponseWriter, r *http.Request) {
+	if feedFollowIDStr := r.PathValue("feedFollowID"); len(feedFollowIDStr) < 1 {
+		_ = RespondWithError(w, http.StatusBadRequest, "invalid feedFollowID provided")
+	} else if feedFollowID, convErr := uuid.Parse(feedFollowIDStr); convErr != nil {
+		_ = RespondWithError(w, http.StatusInternalServerError, convErr.Error())
+	} else if _, deleteErr := config.DB.DeleteFeedFollow(r.Context(), feedFollowID); deleteErr != nil {
+		_ = RespondWithError(w, http.StatusInternalServerError, deleteErr.Error())
+	} else {
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
