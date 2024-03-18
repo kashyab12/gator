@@ -21,6 +21,7 @@ type UserJson struct {
 }
 
 func (config *ApiConfig) PostUsersLegler(w http.ResponseWriter, r *http.Request) {
+	defer CloseIoReadCloser(r.Body)
 	var (
 		decoder  = json.NewDecoder(r.Body)
 		userBody = PostUserBody{}

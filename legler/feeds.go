@@ -24,6 +24,7 @@ type FeedBody struct {
 }
 
 func (config *ApiConfig) PostFeedsLegler(w http.ResponseWriter, r *http.Request, user database.User) {
+	defer CloseIoReadCloser(r.Body)
 	var (
 		decoder  = json.NewDecoder(r.Body)
 		feedBody = PostFeedsBody{}
@@ -58,10 +59,6 @@ func (config *ApiConfig) GetFeedsLegler(w http.ResponseWriter, r *http.Request) 
 	} else if responseErr := RespondWithJson(w, http.StatusOK, dbFeedToFeedJson(allFeeds)); responseErr != nil {
 		_ = RespondWithError(w, http.StatusInternalServerError, responseErr.Error())
 	}
-}
-
-func (config *ApiConfig) PostFeedFollowLegler(w http.ResponseWriter, r *http.Request, user database.User) {
-
 }
 
 func dbFeedToFeedJson(feeds []database.Feed) (feedBodies []FeedBody) {
