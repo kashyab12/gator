@@ -29,7 +29,6 @@ func main() {
 	}
 	appRouter := chi.NewRouter()
 	appRouter.Use(legler.CorsMiddleware)
-
 	apiRouter := chi.NewRouter()
 	apiRouter.Get("/readiness", legler.GetReadinessLegler)
 	apiRouter.Get("/err", legler.GetErrorLegler)

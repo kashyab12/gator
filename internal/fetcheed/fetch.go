@@ -81,7 +81,7 @@ type RssEnclosure struct {
 	Type    string   `xml:"type,attr"`
 }
 
-func FetchFeedData(url string) (any, error) {
+func FetchFeedData(url string) (RssFeedXml, error) {
 	feedData := RssFeedXml{}
 	if resp, reqErr := http.Get(url); reqErr != nil {
 		return feedData, reqErr

@@ -1,10 +1,14 @@
 package legler
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/kashyab12/gator/internal/database"
+	"github.com/kashyab12/gator/internal/fetcheed"
+	"log"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -87,4 +91,31 @@ func dbFeedToFeedJson(feeds []database.Feed) (feedBodies []FeedBody) {
 		feedBodies = append(feedBodies, feedBody)
 	}
 	return feedBodies
+}
+
+func (config *ApiConfig) FetchFeedMaster(intervalInSeconds time.Duration) error {
+	const queryFeedLimit = 10
+	var waitGroup sync.WaitGroup
+	for {
+		<-time.After(time.Second * intervalInSeconds)
+		if fetchedFeeds, fetchErr := config.DB.GetNextFeedsToFetch(context.Background(), queryFeedLimit); fetchErr != nil {
+			return fetchErr
+		} else {
+			for idx, fetchedFeed := range fetchedFeeds {
+				waitGroup.Add(1)
+				go fetchFeedInIntervalWorker(idx, &waitGroup, fetchedFeed)
+			}
+			waitGroup.Wait()
+		}
+	}
+}
+
+func fetchFeedInIntervalWorker(id int, wg *sync.WaitGroup, feed database.Feed) {
+	defer wg.Done()
+	log.Printf("Worker %v - fetching %v\n", id, feed.Url)
+	if feedData, fetchErr := fetcheed.FetchFeedData(feed.Url); fetchErr != nil {
+		log.Printf("Worker %v - error fetching %v data", id, feed.Url)
+	} else {
+		log.Printf("Worker %v - feed Title: %v\n", id, feedData.Channel.Title)
+	}
 }

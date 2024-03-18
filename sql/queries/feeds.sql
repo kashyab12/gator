@@ -7,7 +7,7 @@ RETURNING *;
 select * from feeds;
 
 -- name: GetNextFeedsToFetch :many
-select * from feeds order by last_fetched_at;
+select * from feeds order by last_fetched_at limit $1;
 
 -- name: MarkFeedFetched :one
 update feeds
