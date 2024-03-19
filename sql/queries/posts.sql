@@ -3,7 +3,7 @@ insert into posts(id, created_at, updated_at, title, url, description, published
 values ($1, $2, $3, $4, $5, $6, $7, $8)
 returning *;
 
--- name: GetPostsByFeedId :many
+-- name: GetPostsByUserID :many
 select * from posts
-where feed_id = $1
+where feed_id = (select id from feeds where user_id = $1)
 order by published_at desc limit $2;
