@@ -27,7 +27,7 @@ type CreatePostParams struct {
 	Url         string
 	Description sql.NullString
 	PublishedAt sql.NullTime
-	FeedID      uuid.NullUUID
+	FeedID      uuid.UUID
 }
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
@@ -55,19 +55,19 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 	return i, err
 }
 
-const getPostsByFeedId = `-- name: GetPostsByFeedId :many
+const getPostsByUserID = `-- name: GetPostsByUserID :many
 select id, created_at, updated_at, title, url, description, published_at, feed_id from posts
-where feed_id = $1
+where feed_id in (select id from feeds where user_id = $1)
 order by published_at desc limit $2
 `
 
-type GetPostsByFeedIdParams struct {
-	FeedID uuid.NullUUID
+type GetPostsByUserIDParams struct {
+	UserID uuid.UUID
 	Limit  int32
 }
 
-func (q *Queries) GetPostsByFeedId(ctx context.Context, arg GetPostsByFeedIdParams) ([]Post, error) {
-	rows, err := q.db.QueryContext(ctx, getPostsByFeedId, arg.FeedID, arg.Limit)
+func (q *Queries) GetPostsByUserID(ctx context.Context, arg GetPostsByUserIDParams) ([]Post, error) {
+	rows, err := q.db.QueryContext(ctx, getPostsByUserID, arg.UserID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
