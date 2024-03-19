@@ -118,14 +118,46 @@ func (config *ApiConfig) fetchFeedInIntervalWorker(id int, wg *sync.WaitGroup, f
 		log.Printf("Worker %v - error fetching %v data", id, feed.Url)
 	} else {
 		log.Printf("Worker %v - feed Title: %v\n", id, feedData.Channel.Title)
-		if _, updateErr := config.DB.MarkFeedFetched(context.Background(), database.MarkFeedFetchedParams{
-			LastFetchedAt: sql.NullTime{
-				Time:  time.Now(),
-				Valid: true,
-			},
-			ID: feed.ID,
-		}); updateErr != nil {
-			log.Printf("Worker %v - error updating %v last_fetched_at and updated_at", id, feed.ID)
+		for _, postItem := range feedData.Channel.Items {
+			var (
+				pubDataTs = sql.NullTime{
+					Time:  time.Time{},
+					Valid: false,
+				}
+			)
+
+			// Convert from string to time.Time
+			if parsedPubData, parseErr := time.Parse(time.RFC1123Z, postItem.PubDate); parseErr != nil {
+				log.Println(parseErr)
+			} else {
+				pubDataTs = sql.NullTime{
+					Time:  parsedPubData,
+					Valid: true,
+				}
+			}
+			if createdPost, createErr := config.DB.CreatePost(context.Background(), database.CreatePostParams{
+				ID:          uuid.New(),
+				CreatedAt:   time.Now(),
+				UpdatedAt:   time.Now(),
+				Title:       postItem.Title,
+				Url:         postItem.Link,
+				Description: postItem.Description,
+				PublishedAt: pubDataTs,
+				FeedID:      feed.ID,
+			}); createErr != nil {
+				log.Println(createErr)
+			} else {
+				log.Printf("Worker %v - created post %v\n", id, createdPost)
+			}
+			if _, updateErr := config.DB.MarkFeedFetched(context.Background(), database.MarkFeedFetchedParams{
+				LastFetchedAt: sql.NullTime{
+					Time:  time.Now(),
+					Valid: true,
+				},
+				ID: feed.ID,
+			}); updateErr != nil {
+				log.Printf("Worker %v - error updating %v last_fetched_at and updated_at", id, feed.ID)
+			}
 		}
 	}
 }
