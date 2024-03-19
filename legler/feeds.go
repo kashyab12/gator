@@ -2,6 +2,7 @@ package legler
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/kashyab12/gator/internal/database"
@@ -102,7 +103,7 @@ func (config *ApiConfig) FetchFeedMaster(intervalInSeconds time.Duration) {
 		} else {
 			for idx, fetchedFeed := range fetchedFeeds {
 				waitGroup.Add(1)
-				go fetchFeedInIntervalWorker(idx, &waitGroup, fetchedFeed)
+				go config.fetchFeedInIntervalWorker(idx, &waitGroup, fetchedFeed)
 			}
 			waitGroup.Wait()
 		}
@@ -110,12 +111,21 @@ func (config *ApiConfig) FetchFeedMaster(intervalInSeconds time.Duration) {
 	}
 }
 
-func fetchFeedInIntervalWorker(id int, wg *sync.WaitGroup, feed database.Feed) {
+func (config *ApiConfig) fetchFeedInIntervalWorker(id int, wg *sync.WaitGroup, feed database.Feed) {
 	defer wg.Done()
 	log.Printf("Worker %v - fetching %v\n", id, feed.Url)
 	if feedData, fetchErr := fetcheed.FetchFeedData(feed.Url); fetchErr != nil {
 		log.Printf("Worker %v - error fetching %v data", id, feed.Url)
 	} else {
 		log.Printf("Worker %v - feed Title: %v\n", id, feedData.Channel.Title)
+		if _, updateErr := config.DB.MarkFeedFetched(context.Background(), database.MarkFeedFetchedParams{
+			LastFetchedAt: sql.NullTime{
+				Time:  time.Now(),
+				Valid: true,
+			},
+			ID: feed.ID,
+		}); updateErr != nil {
+			log.Printf("Worker %v - error updating %v last_fetched_at and updated_at", id, feed.ID)
+		}
 	}
 }
