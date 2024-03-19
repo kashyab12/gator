@@ -14,7 +14,7 @@ type PostBody struct {
 	UpdatedAt   time.Time  `json:"updated_at"`
 	Title       string     `json:"title"`
 	Url         string     `json:"url"`
-	Description *string    `json:"description"`
+	Description string     `json:"description"`
 	PublishedAt *time.Time `json:"published_at"`
 	FeedID      uuid.UUID  `json:"feed_id"`
 }
@@ -32,7 +32,28 @@ func (config *ApiConfig) GetPostByUser(w http.ResponseWriter, r *http.Request, u
 		Limit:  queryLimit,
 	}); fetchPostsErr != nil {
 		_ = RespondWithError(w, http.StatusInternalServerError, fetchPostsErr.Error())
-	} else if responseErr := RespondWithJson(w, http.StatusOK, postsByUser); responseErr != nil {
+	} else if responseErr := RespondWithJson(w, http.StatusOK, dbPostToPostJson(postsByUser)); responseErr != nil {
 		_ = RespondWithError(w, http.StatusInternalServerError, responseErr.Error())
 	}
+}
+
+func dbPostToPostJson(posts []database.Post) (postBodies []PostBody) {
+	for _, post := range posts {
+		var publishedAtConv *time.Time = nil
+		if post.PublishedAt.Valid {
+			publishedAtConv = &post.PublishedAt.Time
+		}
+		postBody := PostBody{
+			ID:          post.ID,
+			CreatedAt:   post.CreatedAt,
+			UpdatedAt:   post.UpdatedAt,
+			Title:       post.Title,
+			Url:         post.Url,
+			Description: post.Description,
+			PublishedAt: publishedAtConv,
+			FeedID:      post.FeedID,
+		}
+		postBodies = append(postBodies, postBody)
+	}
+	return postBodies
 }
