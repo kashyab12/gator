@@ -5,7 +5,7 @@ create table posts (
     updated_at timestamp not null,
     title text not null,
     url text unique not null,
-    description text,
+    description text not null,
     published_at timestamp,
     feed_id uuid not null references feeds(id)
         on delete cascade
