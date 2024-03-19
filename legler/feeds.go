@@ -107,7 +107,7 @@ func (config *ApiConfig) FetchFeedMaster(intervalInSeconds time.Duration) {
 			}
 			waitGroup.Wait()
 		}
-		<-time.After(time.Second * intervalInSeconds)
+		<-time.After(intervalInSeconds)
 	}
 }
 
